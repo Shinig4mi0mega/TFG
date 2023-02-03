@@ -49,6 +49,7 @@ public class ServiceThread implements Runnable{
     private custompacket TestHandler(custompacket packet) {
         System.out.println("Server response to test:");
         return new custompacket("TEST_RESPONSE",packet.data);
+        
     }
     
 }

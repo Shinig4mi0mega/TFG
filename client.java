@@ -15,12 +15,16 @@ public class client {
       BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
       BufferedWriter output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
+      System.out.println("TEST REQUEST----------------------------------------------------------------");
       System.out.println("client test request:");
       custompacket request = new custompacket("TEST", "Esto es un test");
       request.send(output);
 
       custompacket response = new custompacket(input);
       System.out.println(response.toString());
+      System.out.println("END TEST REQUEST----------------------------------------------------------------");
+
+      System.out.println( System.getProperty("user.dir"));
 
     } catch (Exception e) {
       e.printStackTrace();
