@@ -2,14 +2,51 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class server {
+    static String host;
+    static int port;
+    static File target;
+    private Thread serverThread;
+    private int nthreads;
 
-    public static void main(String[] args) {
-        String host = "localhost";
-        int port = 9000;
-        File target = new File("target");
+    public void start() {
+
+        //defaultSetUp
+        //if(args.length == 0){
+            host = "localhost";
+            port = 9000;
+            target = new File("target");
+            nthreads = 100;
+        //}
+
+        this.serverThread = new Thread() {
+			@Override
+			public void run() {
+				try (final ServerSocket serverSocket = new ServerSocket(port)) {
+					ExecutorService threadPool = Executors.newFixedThreadPool(nthreads);
+					while (true) {
+
+						Socket socket = serverSocket.accept();
+						//if (stop)
+							//break;
+						ServiceThread st = new ServiceThread(socket);
+						threadPool.execute(st);
+
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+
+		//this.stop = false;
+		this.serverThread.start();
+
 
         try {
             new server().saveFiles(host, port, target);
