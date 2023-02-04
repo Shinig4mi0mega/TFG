@@ -32,23 +32,38 @@ public class ServiceThread implements Runnable{
             response = methodHandler(packet);
             System.out.println(response);
             response.send(output);
+
+            socket.close();
            
         }catch (Exception e) {e.printStackTrace();}
     }
 
 
     private custompacket methodHandler(custompacket packet) {
-        if(packet.method.equals("TEST")){
+        if(packet.method.equals(method.TEST.getMethod())){
             return TestHandler(packet);
+        }else if(packet.method.equals(method.UPLOAD_SYN.getMethod())){
+            return SynHandler(packet);
+        }else{
+            return new custompacket(method.UNKNOWN_METHOD,"");
         }
+    }
 
-        return null;
+
+    //TODO:Validate via a token in custom pakage that corresponds to the password hash
+
+    private custompacket SynHandler(custompacket packet) {
+        if(true){
+            return new custompacket(method.UPLOAD_ACK.getMethod(),"");
+        }else{
+            return new custompacket(method.UPLOAD_CANCEL.getMethod(),"");
+        }
     }
 
 
     private custompacket TestHandler(custompacket packet) {
         System.out.println("Server response to test:");
-        return new custompacket("TEST_RESPONSE",packet.data);
+        return new custompacket(method.TEST_RESPONSE.getMethod(),packet.data);
         
     }
     

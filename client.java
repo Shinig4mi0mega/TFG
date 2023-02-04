@@ -10,34 +10,52 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class client {
+  private String fileSource;
+
   public void start() {
+    fileSource = System.getProperty("user.dir") + "\\PRUEBAS" + "\\SOURCE";
+
     try (Socket socket = new Socket("localhost", 9000)) {
       BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
       BufferedWriter output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
       System.out.println("TEST REQUEST----------------------------------------------------------------");
       System.out.println("client test request:");
-      custompacket request = new custompacket("TEST", "Esto es un test");
+      custompacket request = new custompacket(method.TEST.getMethod(), "Esto es un test");
       request.send(output);
 
       custompacket response = new custompacket(input);
       System.out.println(response.toString());
       System.out.println("END TEST REQUEST----------------------------------------------------------------");
 
-      System.out.println( System.getProperty("user.dir"));
+      System.out.println(fileSource);
+
+      socket.close();
 
     } catch (Exception e) {
       e.printStackTrace();
     }
 
-    // File source = new File("source");
-    // int port = 9000;
+    File source = new File(fileSource);
 
-   /*  try {
-      new client().sendFiles(port, source);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }*/
+    try (Socket socket = new Socket("localhost", 9000)) {
+      BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+      BufferedWriter output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+
+      custompacket uploadSYN = new custompacket("UPLOAD_SYN", "");
+      uploadSYN.send(output);
+      custompacket response = new custompacket(input);
+      if (response.method.equals(method.UPLOAD_ACK.getMethod())) {
+        System.out.println("UPLOAD ALLOWED");
+      } else if (response.method.equals(method.UNKNOWN_METHOD.getMethod())) {
+        System.out.println("UNKNOWN METHOD: Update client");
+      } else if (response.method.equals(method.UPLOAD_CANCEL.getMethod())) {
+        System.out.println("UPLOAD CANCELED: ABORTING UPLOAD");
+      }
+
+      
+    } catch (Exception e) {}
+
   }
 
   private void sendFiles(int port, File source) throws IOException {
