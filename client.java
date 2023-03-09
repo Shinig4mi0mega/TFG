@@ -37,6 +37,7 @@ public class client {
     }
 
     File source = new File(fileSource);
+    System.out.println("Absolute path:" + source.getAbsolutePath());
 
     try (Socket socket = new Socket("localhost", 9000)) {
       BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));

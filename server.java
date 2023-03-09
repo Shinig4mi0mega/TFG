@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 public class server {
     static String host;
     static int port;
-    static File target;
+    static String  fileSystemRootFile;
     private Thread serverThread;
     private int nthreads;
     private HashMap<String, String> users;
@@ -25,13 +25,16 @@ public class server {
         // if(args.length == 0){
         host = "localhost";
         port = 9000;
-        target = new File("target");
+        fileSystemRootFile = System.getProperty("user.dir") + "\\DondeGuardoLosArchivosDeFormaTemporal";
+        File savingFile = new File(fileSystemRootFile);
+        if(!savingFile.exists())
+            savingFile.mkdirs();
         nthreads = 100;
         // }
 
         //TODO:register and login of users
-        users = new HashMap<>();
-        mapUsers();
+        //users = new HashMap<>();
+        //mapUsers();
 
         this.serverThread = new Thread() {
             @Override
@@ -43,7 +46,7 @@ public class server {
                         Socket socket = serverSocket.accept();
                         // if (stop)
                         // break;
-                        ServiceThread st = new ServiceThread(socket);
+                        ServiceThread st = new ServiceThread(socket,fileSystemRootFile);
                         threadPool.execute(st);
 
                     }
@@ -57,8 +60,8 @@ public class server {
         this.serverThread.start();
 
         try {
-            new server().saveFiles(host, port, target);
-        } catch (IOException e) {
+            //new server().saveFiles(host, port, target);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
