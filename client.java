@@ -46,12 +46,13 @@ public class client {
       custompacket uploadSYN = new custompacket("UPLOAD_SYN", "");
       uploadSYN.send(output);
       custompacket response = new custompacket(input);
-      if (response.method.equals(method.UPLOAD_ACK.getMethod())) {
+      if (response.PacketMethod.equals(method.UPLOAD_ACK.getMethod())) {
         System.out.println("UPLOAD ALLOWED");
+        sendFiles(9000, output);
         
-      } else if (response.method.equals(method.UNKNOWN_METHOD.getMethod())) {
+      } else if (response.PacketMethod.equals(method.UNKNOWN_METHOD.getMethod())) {
         System.out.println("UNKNOWN METHOD: Update client");
-      } else if (response.method.equals(method.UPLOAD_CANCEL.getMethod())) {
+      } else if (response.PacketMethod.equals(method.UPLOAD_CANCEL.getMethod())) {
         System.out.println("UPLOAD CANCELED: ABORTING UPLOAD");
       }
 
@@ -60,32 +61,17 @@ public class client {
 
   }
 
-  private void sendFiles(int port, File source) throws IOException {
-    try (ServerSocket serverSocket = new ServerSocket(port)) {
-      System.out.println("Server started on port " + port);
-
-      while (true) {
-        try (Socket clientSocket = serverSocket.accept();
-            OutputStream out = clientSocket.getOutputStream()) {
-          System.out.println("Accepted connection from " + clientSocket.getInetAddress());
-
-          copyDirectory(source, out);
-        }
-      }
-    }
-  }
-
-  private void copyDirectory(File source, OutputStream out) throws IOException {
-    if (source.isDirectory()) {
-      for (File file : source.listFiles()) {
-        copyDirectory(file, out);
+  private void sendFiles(File rootFile, BufferedWriter out) throws IOException {
+    if (rootFile.isDirectory()) {
+      for (File file : rootFile.listFiles()) {
+        sendFiles(file, out);
       }
     } else {
-      try (FileInputStream in = new FileInputStream(source)) {
+      try (FileInputStream in = new FileInputStream(rootFile)) {
         byte[] buffer = new byte[4096];
         int read;
         while ((read = in.read(buffer)) != -1) {
-          out.write(buffer, 0, read);
+          //out.write(buffer, 0, read);
         }
       }
     }

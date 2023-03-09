@@ -10,7 +10,6 @@
  * UPLOAD_END:Informs the server there arent more files to send
  * UPLOAD_END:Confirms the reception of the UPLOAD_END packet
  * UPLOAD_CANCEL:Server negates the upload to the client
- * UPLOAD_FILE:This packet contains a file wich has to be saved
  * 
  * FILE_SAVE:Informs the client the server saved the file correctly (user and file should be the same as the ones sended to verify the file was saved correctly)
  * 
@@ -23,12 +22,11 @@ public enum method {
     TEST_RESPONSE("TEST_RESPONSE"),
     UPLOAD_SYN("UPLOAD_SYN"),
     UPLOAD_ACK("UPLOAD_ACK"),
-    UPLOAD_FILE("UPLOAD_ACK"),
+    UPLOAD_FILE("UPLOAD_FILE"),
     UPLOAD_FILE_ACK("UPLOAD_ACK"),
     UPLOAD_END("UPLOAD_END"),
     UPLOAD_END_ACK("UPLOAD_END_ACK"),
     UPLOAD_CANCEL("UPLOAD_CANCEL"),
-    UPLOAD_FILE("UPLOAD_FILE"),
     FILE_SAVED("FILE_SAVE"),
     FILE_SAVE_FAILED("FILE_SAVE"),
     UNKNOWN_METHOD("UNKNOWN_METHOD");

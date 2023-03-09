@@ -44,9 +44,9 @@ public class ServiceThread implements Runnable {
     }
 
     private custompacket methodHandler(custompacket packet) {
-        if (packet.method.equals(method.TEST.getMethod())) {
+        if (packet.PacketMethod.equals(method.TEST.getMethod())) {
             return TestHandler(packet);
-        } else if (packet.method.equals(method.UPLOAD_SYN.getMethod())) {
+        } else if (packet.PacketMethod.equals(method.UPLOAD_SYN.getMethod())) {
             return SynHandler(packet);
         } else {
             return new custompacket(method.UNKNOWN_METHOD, "");
@@ -56,9 +56,10 @@ public class ServiceThread implements Runnable {
     private custompacket SynHandler(custompacket packet) {
         if (true) {
             new custompacket(method.UPLOAD_ACK.getMethod(), "").send(output);
-            // Este metodo va a devolver un paquete de ACK de que se acabarón los archivos a
-            // subir
+            // Este metodo va a devolver un paquete de ACK de que se acabarón los archivos a subir
+
             return savefiles();
+            //return new custompacket(method.UPLOAD_END_ACK,"");
         } else {
             return new custompacket(method.UPLOAD_CANCEL.getMethod(), "");
         }
@@ -66,8 +67,8 @@ public class ServiceThread implements Runnable {
 
     private custompacket savefiles() {
         custompacket packetFile = new custompacket(input);
-        while (packetFile.method != method.UPLOAD_END.getMethod()) {
-            if (packetFile.method != method.UPLOAD_FILE.getMethod())
+        while (packetFile.PacketMethod != method.UPLOAD_END.getMethod()) {
+            if (packetFile.PacketMethod != method.UPLOAD_FILE.getMethod())
                 continue;
 
             savefile(packetFile);

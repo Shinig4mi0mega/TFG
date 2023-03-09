@@ -11,25 +11,25 @@ import java.io.IOException;
 
  //TODO:param for login user
 public class custompacket {
-    String method;
+    String PacketMethod;
     String user;
     String file;
     String data;
 
     public custompacket(String method, String data) {
-        this.method = method;
+        this.PacketMethod = method;
         this.data = data;
     }
 
     public custompacket(method method, String data) {
-        this.method = method.getMethod();
+        this.PacketMethod = method.getMethod();
         this.data = data;
     }
 
     
 
     public custompacket(String method, String user, String file, String data) {
-        this.method = method;
+        this.PacketMethod = method;
         this.user = user;
         this.file = file;
         this.data = data;
@@ -37,9 +37,9 @@ public class custompacket {
 
     public custompacket(BufferedReader reader) {
         try {
-            method = reader.readLine();
+            PacketMethod = reader.readLine();
             user = reader.readLine();
-            if(this.method == method.UPLOAD_FILE.getMethod()){
+            if(this.PacketMethod == method.UPLOAD_FILE.getMethod()){
                 file = reader.readLine();
                 data = reader.readLine();
             }
@@ -54,9 +54,9 @@ public class custompacket {
     @Override
     public String toString() {
         StringBuilder toret = new StringBuilder();
-        toret.append(method).append("\n");
+        toret.append(PacketMethod).append("\n");
         toret.append(user).append("\n");
-        if(this.method == method.UPLOAD_FILE.getMethod()){
+        if(this.PacketMethod == method.UPLOAD_FILE.getMethod()){
             toret.append(file).append("\n");
             toret.append(data).append("\n");
         }
@@ -66,9 +66,9 @@ public class custompacket {
 
     public void send(BufferedWriter writer) {
         try {
-            writer.write(method + "\n");
+            writer.write(PacketMethod + "\n");
             writer.write(user + "\n");
-            if(this.method == method.UPLOAD_FILE.getMethod()){
+            if(this.PacketMethod == method.UPLOAD_FILE.getMethod()){
                 writer.write(file + "\n");
                 writer.write(data + "\n");
             }
