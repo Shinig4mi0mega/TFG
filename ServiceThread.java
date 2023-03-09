@@ -1,11 +1,14 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.invoke.MethodHandle;
 import java.net.ServerSocket;
 import java.net.Socket;
-
+import java.util.Base64;
 import javax.xml.transform.sax.TemplatesHandler;
 
 public class ServiceThread implements Runnable {
@@ -67,28 +70,38 @@ public class ServiceThread implements Runnable {
             if (packetFile.method != method.UPLOAD_FILE.getMethod())
                 continue;
 
-            savefile()
-            
+            savefile(packetFile);
+
         }
 
         return new custompacket(method.UPLOAD_END_ACK.getMethod(), "");
     }
-    
-    private void savefile() {
-        // Creamos un objeto File con la ruta completa
-    File archivo = new File(rutaCompleta);
-    
-    // Obtenemos el directorio padre
-    File directorio = archivo.getParentFile();
-    
-    // Creamos los directorios si no existen, relativos a la carpeta base
-    String rutaRelativa = directorio.getAbsolutePath().replace(carpetaBase, "");
-    File directorioBase = new File(carpetaBase + rutaRelativa);
-    if (!directorioBase.exists()) {
-        directorioBase.mkdirs();
+
+    private void savefile(custompacket packetFile) {
+        packetFile.file.replace(":", "");
+        // ruta al archivo
+        String localRoute = fileSystemRootFile + "\\" + packetFile.user + "\\" + packetFile.file;
+
+        File currentFile = new File(localRoute);
+        File parentDir = currentFile.getParentFile();
+        // Si no existen los directorios padre, se crean
+        if (!parentDir.exists())
+            parentDir.mkdirs();
+
+        // creamos y escribimos en el archivola data
+        try {
+            currentFile.createNewFile();
+            String decodedData = new String(Base64.getDecoder().decode(packetFile.data.getBytes()));
+
+            FileWriter myWriter = new FileWriter(localRoute);
+            myWriter.write(decodedData);
+            myWriter.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
-    }
-    
 
     private custompacket TestHandler(custompacket packet) {
         System.out.println("Server response to test:");
