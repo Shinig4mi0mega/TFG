@@ -46,11 +46,12 @@ public class client {
       custompacket uploadSYN = new custompacket("UPLOAD_SYN", "");
       uploadSYN.send(output);
       custompacket response = new custompacket(input);
-      if (response.method.equals(method.UPLOAD_ACK.getMethod())) {
+      if (response.PacketMethod.equals(method.UPLOAD_ACK.getMethod())) {
         System.out.println("UPLOAD ALLOWED");
-      } else if (response.method.equals(method.UNKNOWN_METHOD.getMethod())) {
+        
+      } else if (response.PacketMethod.equals(method.UNKNOWN_METHOD.getMethod())) {
         System.out.println("UNKNOWN METHOD: Update client");
-      } else if (response.method.equals(method.UPLOAD_CANCEL.getMethod())) {
+      } else if (response.PacketMethod.equals(method.UPLOAD_CANCEL.getMethod())) {
         System.out.println("UPLOAD CANCELED: ABORTING UPLOAD");
       }
 

@@ -67,7 +67,7 @@ public class ServiceThread implements Runnable {
             if (packetFile.method != method.UPLOAD_FILE.getMethod())
                 continue;
 
-            savefile(packetFile):
+            savefile()
             
         }
 
@@ -75,7 +75,7 @@ public class ServiceThread implements Runnable {
     }
     
     private void savefile() {
-    // Creamos un objeto File con la ruta completa
+        // Creamos un objeto File con la ruta completa
     File archivo = new File(rutaCompleta);
     
     // Obtenemos el directorio padre
