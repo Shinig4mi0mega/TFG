@@ -48,7 +48,7 @@ public class client {
       custompacket response = new custompacket(input);
       if (response.PacketMethod.equals(method.UPLOAD_ACK.getMethod())) {
         System.out.println("UPLOAD ALLOWED");
-        sendFiles(9000, output);
+        //sendFiles(9000, output);
         
       } else if (response.PacketMethod.equals(method.UNKNOWN_METHOD.getMethod())) {
         System.out.println("UNKNOWN METHOD: Update client");

@@ -73,7 +73,8 @@ public class custompacket {
                 writer.write(data + "\n");
             }
             writer.flush();
-        } catch (Exception e) {e.printStackTrace();}
+        } catch (Exception e) {//e.printStackTrace();
+        }
 
     }
 

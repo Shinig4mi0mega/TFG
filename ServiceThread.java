@@ -58,8 +58,8 @@ public class ServiceThread implements Runnable {
             new custompacket(method.UPLOAD_ACK.getMethod(), "").send(output);
             // Este metodo va a devolver un paquete de ACK de que se acabarón los archivos a subir
 
-            return savefiles();
-            //return new custompacket(method.UPLOAD_END_ACK,"");
+            //return savefiles();
+            return new custompacket(method.UPLOAD_END_ACK,"");
         } else {
             return new custompacket(method.UPLOAD_CANCEL.getMethod(), "");
         }
