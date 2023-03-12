@@ -67,7 +67,7 @@ public class ServiceThread implements Runnable {
             new custompacket(method.UPLOAD_ACK.getMethod(), "Server", "").send(output);
             System.out.println("llamando save files");
             return savefiles();
-            //return new custompacket(method.UPLOAD_END_ACK, "Server", "");
+            // return new custompacket(method.UPLOAD_END_ACK, "Server", "");
         } else {
             return new custompacket(method.UPLOAD_CANCEL.getMethod(), "Server", "");
         }
@@ -75,31 +75,33 @@ public class ServiceThread implements Runnable {
 
     private custompacket savefiles() {
         try {
-            input =  new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException e) {
             e.printStackTrace();
         }
         System.out.println("Ready to save files");
         custompacket packetFile = new custompacket(input);
-        
-        while (packetFile.PacketMethod != method.UPLOAD_END.getMethod()) {
-            //if (packetFile.PacketMethod != method.UPLOAD_FILE.getMethod())
-                //  continue;
 
-            //packetFile.toString();
+        while (!packetFile.PacketMethod.equals(method.UPLOAD_END.getMethod()) ) {
+            if (!packetFile.PacketMethod.equals(method.UPLOAD_FILE.getMethod()))
+                continue;
+
+            // packetFile.toString();
             savefile(packetFile);
-            new custompacket(method.UPLOAD_ACK.getMethod(),"Server","").send(output);
+            new custompacket(method.UPLOAD_ACK.getMethod(), "Server", "").send(output);
+            System.out.println(packetFile.PacketMethod);
             packetFile = new custompacket(input);
         }
 
+        System.out.println("No more files, sending upload end ack");
         return new custompacket(method.UPLOAD_END_ACK.getMethod(), "Server", "");
     }
 
     private void savefile(custompacket packetFile) {
-        byte[] decodedBytesPath = Base64.getDecoder().decode( packetFile.file);
+        byte[] decodedBytesPath = Base64.getDecoder().decode(packetFile.file);
         String decodedPath = new String(decodedBytesPath);
         decodedPath = decodedPath.replace(":", "");
-        
+
         // ruta al archivo
         String localRoute = fileSystemRootFile + "\\" + packetFile.user + "\\" + decodedPath;
         System.out.println("Saving in: " + localRoute);
@@ -114,7 +116,7 @@ public class ServiceThread implements Runnable {
         try {
             currentFile.createNewFile();
             byte[] decodedBytesData = Base64.getDecoder().decode(packetFile.data.getBytes());
-            String decodedData =  new String(decodedBytesData);
+            String decodedData = new String(decodedBytesData);
 
             FileWriter myWriter = new FileWriter(localRoute);
             myWriter.write(decodedData);

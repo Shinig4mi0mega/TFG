@@ -18,7 +18,8 @@ public class client {
 
   public void start() {
     //fileSource = System.getProperty("user.dir") + "\\PRUEBAS" + "\\SOURCE";
-    fileSource = "C:\\Users\\Manolo\\Documents\\GitHub" ;
+    //fileSource = "C:\\Users\\Manolo\\Desktop\\haizea" ;
+    fileSource = "C:\\Users\\Manolo\\Desktop\\Sockets" ;
 
     File source = new File(fileSource);
     System.out.println("Absolute path:" + source.getAbsolutePath());
@@ -35,7 +36,8 @@ public class client {
         System.out.println("UPLOAD ALLOWED");
         //Thread.sleep(100);
         sendFiles(new File(fileSource), output);
-        new custompacket(method.UPLOAD_END, "client", "");
+        System.out.println("Files uploaded, sending upload end");
+        new custompacket(method.UPLOAD_END, "client", "").send(output);
         new custompacket(input);
 
       } else if (response.PacketMethod.equals(method.UNKNOWN_METHOD.getMethod())) {
