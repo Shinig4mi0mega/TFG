@@ -17,9 +17,9 @@ public class client {
   BufferedWriter output;
 
   public void start() {
-    //fileSource = System.getProperty("user.dir") + "\\PRUEBAS" + "\\SOURCE";
+    fileSource = System.getProperty("user.dir") + "\\PRUEBAS" + "\\SOURCE";
     //fileSource = "C:\\Users\\Manolo\\Desktop\\haizea" ;
-    fileSource = "C:\\Users\\Manolo\\Desktop\\Sockets" ;
+    //fileSource = "C:\\Users\\Manolo\\Desktop\\Sockets" ;
 
     File source = new File(fileSource);
     System.out.println("Absolute path:" + source.getAbsolutePath());
