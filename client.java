@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -15,11 +17,10 @@ public class client {
   private String fileSource;
   BufferedReader input;
   BufferedWriter output;
+  String user = "user";
 
   public void start() {
     fileSource = System.getProperty("user.dir") + "\\PRUEBAS" + "\\SOURCE";
-    //fileSource = "C:\\Users\\Manolo\\Desktop\\haizea" ;
-    //fileSource = "C:\\Users\\Manolo\\Desktop\\Sockets" ;
 
     File source = new File(fileSource);
     System.out.println("Absolute path:" + source.getAbsolutePath());
@@ -28,16 +29,19 @@ public class client {
       input = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
       output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
-      custompacket uploadSYN = new custompacket("UPLOAD_SYN", "clien", "");
+      custompacket uploadSYN = new custompacket("UPLOAD_SYN", user, "");
       uploadSYN.send(output);
       custompacket response = new custompacket(input);
       System.out.println(response.toString());
+
       if (response.PacketMethod.equals(method.UPLOAD_ACK.getMethod())) {
         System.out.println("UPLOAD ALLOWED");
-        //Thread.sleep(100);
+        Thread.sleep(100);
+
         sendFiles(new File(fileSource), output);
+
         System.out.println("Files uploaded, sending upload end");
-        new custompacket(method.UPLOAD_END, "client", "").send(output);
+        new custompacket(method.UPLOAD_END, user, "").send(output);
         new custompacket(input);
 
       } else if (response.PacketMethod.equals(method.UNKNOWN_METHOD.getMethod())) {
@@ -60,26 +64,45 @@ public class client {
       }
 
     } else {
-      Scanner reader = new Scanner(rootFile);
-      String data = "";
-      // leer archivo
-      while (reader.hasNextLine()) {
-        data += reader.nextLine();
-      }
 
+      //leemos la data del archivo
+      String data = readFile(rootFile);
+      System.out.println("data = " + data);
+
+      //Encode path
       String Filepath = rootFile.getAbsolutePath();
-      
       String EncodedPath = Base64.getEncoder().encodeToString(Filepath.getBytes());
 
-      data = Base64.getEncoder().encodeToString(data.getBytes());
-      custompacket sended = new custompacket(method.UPLOAD_FILE.getMethod(), "client", EncodedPath, data);
+      //encode data
+      String Encodeddata = Base64.getEncoder().encodeToString(data.getBytes());
+      custompacket sended = new custompacket(method.UPLOAD_FILE.getMethod(), user, EncodedPath, Encodeddata);
 
       sended.send(out);
       new custompacket(input);
     }
   }
 
-  
+  String readFile(File rootFile) {
+    Scanner reader;
+    StringBuilder data = new StringBuilder();
+    try {
+      reader = new Scanner(rootFile, "UTF-8");
+      
+      // leer archivo
+      while (reader.hasNextLine()) {
+        String line = reader.nextLine();
+        System.out.println(line);
+        data.append(line);
+
+      }
+      reader.close();
+
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+
+    return data.toString();
+  }
 
   public void test() {
     try (Socket socket = new Socket("localhost", 9000)) {
