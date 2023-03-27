@@ -87,6 +87,7 @@ public class ServiceThread implements Runnable {
                 continue;
 
             // packetFile.toString();
+           
             savefile(packetFile);
             new custompacket(method.UPLOAD_ACK.getMethod(), "Server", "").send(output);
             System.out.println(packetFile.PacketMethod);
@@ -117,6 +118,7 @@ public class ServiceThread implements Runnable {
             currentFile.createNewFile();
             byte[] decodedBytesData = Base64.getDecoder().decode(packetFile.data.getBytes());
             String decodedData = new String(decodedBytesData);
+            System.out.println(decodedData);
 
             FileWriter myWriter = new FileWriter(localRoute);
             myWriter.write(decodedData);
