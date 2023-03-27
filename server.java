@@ -1,6 +1,8 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
@@ -12,29 +14,36 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class server {
-    static String host;
+    
     static int port;
-    static String  fileSystemRootFile;
+    static String fileSystemRootFile;
     private Thread serverThread;
     private int nthreads;
     private HashMap<String, String> users;
+    private HashMap<String, String> configMap;
 
     public void start() {
 
-        // defaultSetUp
-        // if(args.length == 0){
-        host = "localhost";
-        port = 9000;
-        fileSystemRootFile = System.getProperty("user.dir") + "\\DondeGuardoLosArchivosDeFormaTemporal";
-        File savingFile = new File(fileSystemRootFile);
-        if(!savingFile.exists())
-            savingFile.mkdirs();
-        nthreads = 100;
-        // }
+        configMap = new HashMap<>();
+        if (!loadConfig()) {
+            port = 9000;
+            nthreads = 100;
+            fileSystemRootFile = System.getProperty("user.dir") + "\\DondeGuardoLosArchivosDeFormaTemporal";
+        }else{
+             port = Integer.parseInt(configMap.get("port")); 
+             nthreads = Integer.parseInt(configMap.get("threads"));
+             fileSystemRootFile = configMap.get("saveRoute");
+        }
 
-        //TODO:register and login of users
-        //users = new HashMap<>();
-        //mapUsers();
+        
+        File savingFile = new File(fileSystemRootFile);
+        if (!savingFile.exists())
+            savingFile.mkdirs();
+
+        System.out.println("Config loaded");
+        System.out.println("saving files in: " + configMap.get("saveRoute"));
+        System.out.println("threadpool of : " + configMap.get("threads") + " threads");
+        System.out.println("Listening on port: " + configMap.get("port"));
 
         this.serverThread = new Thread() {
             @Override
@@ -46,7 +55,7 @@ public class server {
                         Socket socket = serverSocket.accept();
                         // if (stop)
                         // break;
-                        ServiceThread st = new ServiceThread(socket,fileSystemRootFile);
+                        ServiceThread st = new ServiceThread(socket, fileSystemRootFile);
                         threadPool.execute(st);
 
                     }
@@ -60,10 +69,43 @@ public class server {
         this.serverThread.start();
 
         try {
-            //new server().saveFiles(host, port, target);
+            // new server().saveFiles(host, port, target);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /*
+     * setable configuration:
+     * port
+     * threads
+     * saving pwd(MUST BE ABSOLUTE PATH)
+     * 
+     */
+
+    private boolean loadConfig() {
+        File file = new File("config");
+        if (!file.exists()) {
+            System.out.println("Config file doesnt exist, please restore it");
+            System.out.println("Using default config");
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader("config"))) {
+            String line;
+            String lineArray[];
+
+            while ((line = br.readLine()) != null) {
+                if (!line.contains("="))
+                    continue;
+
+                lineArray = line.split("=");
+                configMap.put(lineArray[0], lineArray[1]);
+            }
+        } catch (IOException e) {
+            System.err.format("IOException: %s%n", e);
+        }
+
+        return true;
     }
 
     private boolean mapUsers() {
@@ -73,7 +115,8 @@ public class server {
             System.out.println("No user file found, building file");
             try {
                 userFile.createNewFile();
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
             return false;
         }
 
