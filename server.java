@@ -21,6 +21,7 @@ public class server {
     private int nthreads;
     private HashMap<String, String> users;
     private HashMap<String, String> configMap;
+    private String os;
 
     public void start() {
 
@@ -41,9 +42,11 @@ public class server {
             savingFile.mkdirs();
 
         System.out.println("Config loaded");
+        System.out.println("Detected os: " + os);
         System.out.println("saving files in: " + configMap.get("saveRoute"));
         System.out.println("threadpool of : " + configMap.get("threads") + " threads");
         System.out.println("Listening on port: " + configMap.get("port"));
+        System.out.println("----------------------------------------------");
 
         this.serverThread = new Thread() {
             @Override
@@ -55,7 +58,7 @@ public class server {
                         Socket socket = serverSocket.accept();
                         // if (stop)
                         // break;
-                        ServiceThread st = new ServiceThread(socket, fileSystemRootFile);
+                        ServiceThread st = new ServiceThread(socket, fileSystemRootFile,os);
                         threadPool.execute(st);
 
                     }
@@ -104,6 +107,8 @@ public class server {
         } catch (IOException e) {
             System.err.format("IOException: %s%n", e);
         }
+
+        os = System.getProperty("os.name").toLowerCase();
 
         return true;
     }
