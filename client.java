@@ -83,33 +83,6 @@ public class client {
 
   byte[] readFile(File rootFile) {
 
-    if (rootFile.getName().contains(".png")||rootFile.getName().contains(".pdf")) {
-      System.out.println("tratando imagen");
-      return readimg(rootFile);
-    }
-
-    Scanner reader;
-    StringBuilder data = new StringBuilder();
-    try {
-      reader = new Scanner(rootFile, "UTF-8");
-
-      // leer archivo
-      while (reader.hasNextLine()) {
-        String line = reader.nextLine();
-        System.out.println(line);
-        data.append(line);
-
-      }
-      reader.close();
-
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-
-    return data.toString().getBytes();
-  }
-
-  private byte[] readimg(File rootFile) {
     try (FileInputStream stream = new FileInputStream(rootFile)) {
       byte[] bytes = new byte[(int) rootFile.length()];
       stream.read(bytes);
