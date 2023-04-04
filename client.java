@@ -42,7 +42,6 @@ public class client {
 
         System.out.println("Files uploaded, sending upload end");
         new custompacket(method.UPLOAD_END, user, "").send(output);
-        new custompacket(input);
 
       } else if (response.PacketMethod.equals(method.UNKNOWN_METHOD.getMethod())) {
         System.out.println("UNKNOWN METHOD: Update client");
@@ -65,20 +64,21 @@ public class client {
 
     } else {
 
-      //leemos la data del archivo
+      // leemos la data del archivo
       String data = readFile(rootFile);
       System.out.println("data = " + data);
 
-      //Encode path
+      // Encode path
       String Filepath = rootFile.getAbsolutePath();
+      Filepath = simplifyRoute(fileSource, Filepath);
+      System.out.println("simplified route = " + Filepath);
       String EncodedPath = Base64.getEncoder().encodeToString(Filepath.getBytes());
 
-      //encode data
+      // encode data
       String Encodeddata = Base64.getEncoder().encodeToString(data.getBytes());
       custompacket sended = new custompacket(method.UPLOAD_FILE.getMethod(), user, EncodedPath, Encodeddata);
 
       sended.send(out);
-      new custompacket(input);
     }
   }
 
@@ -87,7 +87,7 @@ public class client {
     StringBuilder data = new StringBuilder();
     try {
       reader = new Scanner(rootFile, "UTF-8");
-      
+
       // leer archivo
       while (reader.hasNextLine()) {
         String line = reader.nextLine();
@@ -102,6 +102,18 @@ public class client {
     }
 
     return data.toString();
+  }
+
+  public static String simplifyRoute(String ruta, String file) {
+    String[] arrayRuta = ruta.split("\\\\");
+    String[] arrayFile = file.split("\\\\");
+    StringBuilder toret = new StringBuilder();
+
+    for (int i = arrayRuta.length - 1; i < arrayFile.length; i++) {
+      toret.append("\\").append(arrayFile[i]);
+    }
+
+    return toret.toString();
   }
 
   public void test() {

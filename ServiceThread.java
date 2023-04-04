@@ -16,6 +16,7 @@ public class ServiceThread implements Runnable {
     BufferedReader input;
     BufferedWriter output;
     private String fileSystemRootFile;
+    private String separador;
 
     public ServiceThread(Socket socket, String fileSystemRootFile) {
         this.socket = socket;
@@ -24,6 +25,20 @@ public class ServiceThread implements Runnable {
 
     @Override
     public void run() {
+        String sistemaOperativo = System.getProperty("os.name").toLowerCase();
+        if (sistemaOperativo.contains("win")) {
+            // El programa se está ejecutando en Windows
+            separador = "\\" ;
+        }else if (sistemaOperativo.contains("nix") || sistemaOperativo.contains("nux") || sistemaOperativo.contains("aix")) {
+            // El programa se está ejecutando en Linux o Unix
+            separador = "/" ;
+        }
+        fileSystemRootFile = fileSystemRootFile.replace("\\", separador);
+        System.out.println("fileSystemRootFile = " + fileSystemRootFile);
+
+
+
+
         try (Socket socket = this.socket) {
 
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -102,9 +117,15 @@ public class ServiceThread implements Runnable {
         byte[] decodedBytesPath = Base64.getDecoder().decode(packetFile.file);
         String decodedPath = new String(decodedBytesPath);
         decodedPath = decodedPath.replace(":", "");
+        decodedPath = decodedPath.replace("\\", separador);
+
+
 
         // ruta al archivo
-        String localRoute = fileSystemRootFile + "\\" + packetFile.user + "\\" + decodedPath;
+        String localRoute = fileSystemRootFile + separador + packetFile.user + decodedPath;
+
+        System.out.println("decodedPath: " + decodedPath);
+        System.out.println("saving on user: " + packetFile.user);
         System.out.println("Saving in: " + localRoute);
 
         File currentFile = new File(localRoute);
@@ -112,6 +133,14 @@ public class ServiceThread implements Runnable {
         // Si no existen los directorios padre, se crean
         if (!parentDir.exists())
             parentDir.mkdirs();
+
+        if(!currentFile.exists())
+            try {
+                currentFile.createNewFile();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
         // creamos y escribimos en el archivola data
         try {
