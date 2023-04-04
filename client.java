@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -61,8 +62,8 @@ public class client {
     } else {
 
       // leemos la data del archivo
-      String data = readFile(rootFile);
-      System.out.println("data = " + data);
+      byte[] data = readFile(rootFile);
+      //System.out.println("data = " + data);
 
       // Encode path
       String Filepath = rootFile.getAbsolutePath();
@@ -71,16 +72,22 @@ public class client {
       String EncodedPath = Base64.getEncoder().encodeToString(Filepath.getBytes());
 
       // encode data
-      String Encodeddata = Base64.getEncoder().encodeToString(data.getBytes());
+      String Encodeddata = Base64.getEncoder().encodeToString(data);
       custompacket sended = new custompacket(method.UPLOAD_FILE.getMethod(), user, EncodedPath, Encodeddata);
 
       sended.send(out);
-      //TODO:Tratar este upload ack
+      // TODO:Tratar este upload ack
       new custompacket(input);
     }
   }
 
-  String readFile(File rootFile) {
+  byte[] readFile(File rootFile) {
+
+    if (rootFile.getName().contains(".png")||rootFile.getName().contains(".pdf")) {
+      System.out.println("tratando imagen");
+      return readimg(rootFile);
+    }
+
     Scanner reader;
     StringBuilder data = new StringBuilder();
     try {
@@ -99,7 +106,19 @@ public class client {
       e.printStackTrace();
     }
 
-    return data.toString();
+    return data.toString().getBytes();
+  }
+
+  private byte[] readimg(File rootFile) {
+    try (FileInputStream stream = new FileInputStream(rootFile)) {
+      byte[] bytes = new byte[(int) rootFile.length()];
+      stream.read(bytes);
+      return bytes;
+    } catch (IOException e) {
+      System.err.println("Error al leer archivo como bytes: " + e.getMessage());
+      e.printStackTrace();
+      return null;
+    }
   }
 
   public static String simplifyRoute(String ruta, String file) {

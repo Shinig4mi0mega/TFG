@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -49,7 +50,7 @@ public class ServiceThread implements Runnable {
             socket.close();
 
         } catch (Exception e) {
-            //e.printStackTrace();
+            // e.printStackTrace();
             System.out.println("conexión cerrada");
         }
     }
@@ -87,8 +88,8 @@ public class ServiceThread implements Runnable {
         try {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException e) {
-            //e.printStackTrace();
-            System.out.println("fallo con un input que se puso anull");
+            // e.printStackTrace();
+            System.out.println("fallo con un input que se puso a null");
         }
 
         custompacket packetFile = new custompacket(input);
@@ -96,8 +97,6 @@ public class ServiceThread implements Runnable {
         while (!packetFile.PacketMethod.equals(method.UPLOAD_END.getMethod())) {
             if (!packetFile.PacketMethod.equals(method.UPLOAD_FILE.getMethod()))
                 continue;
-
-            // packetFile.toString();
 
             savefile(packetFile);
             new custompacket(method.UPLOAD_ACK.getMethod(), "Server", "").send(output);
@@ -125,25 +124,14 @@ public class ServiceThread implements Runnable {
         if (!parentDir.exists())
             parentDir.mkdirs();
 
-        if (!currentFile.exists())
-            try {
-                currentFile.createNewFile();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
         // creamos y escribimos en el archivola data
         try {
             currentFile.createNewFile();
             byte[] decodedBytesData = Base64.getDecoder().decode(packetFile.data.getBytes());
-            String decodedData = new String(decodedBytesData);
 
-            System.out.println("data= " + decodedData);
-
-            FileWriter myWriter = new FileWriter(localRoute);
-            myWriter.write(decodedData);
-            myWriter.close();
+            FileOutputStream stream = new FileOutputStream(localRoute);
+            stream.write(decodedBytesData);
+            stream.close();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
