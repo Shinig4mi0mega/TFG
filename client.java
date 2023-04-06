@@ -20,7 +20,6 @@ public class client {
     fileSource = System.getProperty("user.dir") + "\\PRUEBAS" + "\\SOURCE";
 
     File source = new File(fileSource);
-    System.out.println("Absolute path:" + source.getAbsolutePath());
 
     try (Socket socket = new Socket("localhost", 9001)) {
       input = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
@@ -29,7 +28,6 @@ public class client {
       custompacket uploadSYN = new custompacket("UPLOAD_SYN", user, "");
       uploadSYN.send(output);
       custompacket response = new custompacket(input);
-      System.out.println(response.toString());
 
       if (response.PacketMethod.equals(method.UPLOAD_ACK.getMethod())) {
         System.out.println("UPLOAD ALLOWED");
@@ -68,7 +66,6 @@ public class client {
       // Encode path
       String Filepath = rootFile.getAbsolutePath();
       Filepath = simplifyRoute(fileSource, Filepath);
-      System.out.println("simplified route = " + Filepath);
       String EncodedPath = Base64.getEncoder().encodeToString(Filepath.getBytes());
 
       // encode data

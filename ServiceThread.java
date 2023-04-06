@@ -140,7 +140,7 @@ public class ServiceThread implements Runnable {
     }
 
     private custompacket TestHandler(custompacket packet) {
-
+        System.out.println("Test packet recive from: " + packet.user);
         return new custompacket(method.TEST_RESPONSE.getMethod(), "Server", packet.data);
 
     }
