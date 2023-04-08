@@ -112,6 +112,7 @@ public class ServiceThread implements Runnable {
         String decodedPath = new String(decodedBytesPath);
         decodedPath = decodedPath.replace(":", "");
         decodedPath = decodedPath.replace("\\", separador);
+        decodedPath = decodedPath.replace("/", separador);
 
         System.out.println("guardando archivo: " + decodedPath);
 
