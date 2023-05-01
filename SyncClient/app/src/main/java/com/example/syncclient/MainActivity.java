@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ListView;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     EditText ip_input;
     EditText port_input;
     SharedPreferences prefs;
+    lastUploadAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         user_input = findViewById(R.id.user_input);
         ip_input = findViewById(R.id.ip_input);
         port_input = findViewById(R.id.port_input);
+        ListView users = findViewById(R.id.lastUploads);
         CheckBox checkBox = findViewById(R.id.test_result);
 
         prefs = getSharedPreferences("conection", Context.MODE_PRIVATE);
@@ -57,12 +60,17 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 new Thread(new Runnable() {
                     public void run() {
-                        final boolean res = testServer();
+                        final boolean resTest = testServer();
+                        String lastUploads = getUploads();
                         runOnUiThread(new Runnable() {
                             public void run() {
-                                Log.d("TAG", "Estado de conexión: " + res);
+                                Log.d("TAG", "Estado de conexión: " + resTest);
                                 // Usar la variable final adicional para actualizar la interfaz de usuario
-                                checkBox.setChecked(res);
+                                checkBox.setChecked(resTest);
+                                adapter = new lastUploadAdapter(MainActivity.this,lastUploads);
+                                users.setAdapter(adapter);
+                                adapter.notifyDataSetChanged();
+
                             }
                         });
                     }
@@ -73,6 +81,33 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    }
+
+    private String getUploads() {
+        user = user_input.getText().toString();
+        ip = ip_input.getText().toString();
+        String valor = port_input.getText().toString();
+        port = Integer.parseInt(valor);
+
+        try (Socket socket = new Socket(ip, port)) {
+            socket.setSoTimeout(200);
+            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+            BufferedWriter output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+
+
+            custompacket request = new custompacket(method.LAST_UPLOADS_SYN.getMethod(), user, "");
+            request.send(output);
+
+            custompacket response = new custompacket(input);
+            socket.close();
+
+            Log.d("TAG", response.data);
+
+            return response.data;
+
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     private void loadPreferences() {

@@ -13,6 +13,9 @@
  * 
  * FILE_SAVE:Informs the client the server saved the file correctly (user and file should be the same as the ones sended to verify the file was saved correctly)
  * 
+ * LAST_UPLOADS_SYN: The client is asking for the last time a user uploaded a file
+ * LAST_UPLOADS_ACK: answers the LAST_UPLOADS_SYN with the last uploads done of each client
+ * 
  * UNKNOWN_METHOD:response to a unknown method send by server o client
  */
 
@@ -29,6 +32,8 @@ public enum method {
     UPLOAD_CANCEL("UPLOAD_CANCEL"),
     FILE_SAVED("FILE_SAVE"),
     FILE_SAVE_FAILED("FILE_SAVE"),
+    LAST_UPLOADS_SYN("LAST_UPLOADS_SYN"),
+    LAST_UPLOADS_ACK("LAST_UPLOADS_ACK"),
     UNKNOWN_METHOD("UNKNOWN_METHOD");
 
     private String method;

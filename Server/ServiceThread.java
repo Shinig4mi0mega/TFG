@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Date;
 
 public class ServiceThread implements Runnable {
     private Socket socket;
@@ -49,6 +51,9 @@ public class ServiceThread implements Runnable {
 
             socket.close();
 
+            System.out.println(response.toString());
+            
+
         } catch (Exception e) {
             // e.printStackTrace();
             System.out.println("conexión cerrada");
@@ -57,14 +62,19 @@ public class ServiceThread implements Runnable {
 
     private custompacket methodHandler(custompacket packet) {
         if (packet.PacketMethod.equals(method.TEST.getMethod())) {
-
             return TestHandler(packet);
         } else if (packet.PacketMethod.equals(method.UPLOAD_SYN.getMethod())) {
-
             return SynHandler(packet);
+        }else if(packet.PacketMethod.equals(method.LAST_UPLOADS_SYN.getMethod())){
+            return lastUploadsHandler();
         } else {
             return new custompacket(method.UNKNOWN_METHOD, "Server", "");
         }
+    }
+
+    private custompacket lastUploadsHandler() {
+        System.out.println(lastUploads());
+        return new custompacket(method.LAST_UPLOADS_ACK,"server",lastUploads());
     }
 
     private custompacket SynHandler(custompacket packet) {
@@ -142,8 +152,26 @@ public class ServiceThread implements Runnable {
 
     private custompacket TestHandler(custompacket packet) {
         System.out.println("Test packet recive from: " + packet.user);
+        //System.out.println(lastUploads());
         return new custompacket(method.TEST_RESPONSE.getMethod(), "Server", packet.data);
 
     }
 
+    private String lastUploads() {
+
+        File savingFolder = new File(fileSystemRootFile);
+        StringBuilder toret = new StringBuilder();
+
+        for (File f : savingFolder.listFiles()) {
+
+            Date date = new Date();
+            date.setTime(f.lastModified());
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+            String formattedDate = formatter.format(date);
+
+            toret.append(f.getName()).append("=").append(formattedDate).append(";");
+        }
+
+        return toret.toString();
+    }
 }

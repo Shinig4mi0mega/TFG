@@ -30,7 +30,6 @@ public class custompacket {
         this.user = user;
         this.data = data;
         this.file = "emty";
-        this.data = "emty";
     }
 
     public custompacket(String method, String user, String file, String data) {
