@@ -39,9 +39,8 @@ public class custompacket {
         this.data = data;
     }
 
-    public custompacket(BufferedReader reader) {
+    public custompacket(BufferedReader reader) throws Exception {
 
-        try {
             PacketMethod = reader.readLine().split(":")[1];
             user = reader.readLine().split(":")[1];
 
@@ -59,9 +58,7 @@ public class custompacket {
 
             // System.out.println(this.toString());
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        
 
     }
 

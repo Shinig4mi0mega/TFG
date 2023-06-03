@@ -11,35 +11,44 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.documentfile.provider.DocumentFile;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
 public class saveFileAdapter extends BaseAdapter {
 
-    Context context;
-    Map folders;
+    private  LayoutInflater inflater;
+    private  Context context;
+    ArrayList<String> files = new ArrayList();
 
-    LayoutInflater inflater;
-
-    String[] names;
-
-    saveFileAdapter(Context context, Map<String, ?> folders) {
+    saveFileAdapter(Context context, DocumentFile fileToList) {
         this.context = context;
-        this.folders = folders;
         this.inflater = LayoutInflater.from(context);
-        names = (String[]) folders.keySet().toArray(new String[folders.keySet().size()]);
+        makeFileList(fileToList);
+    }
+
+    private void makeFileList(DocumentFile fileToList) {
+
+        if (fileToList.isDirectory()) {
+            for (DocumentFile file : fileToList.listFiles()) {
+                makeFileList(file);
+            }
+        }else{
+            files.add(fileToList.getName());
+        }
     }
 
 
     @Override
     public int getCount() {
-        return folders.size();
+        return files.size();
     }
 
     @Override
     public String getItem(int position) {
-        return names[position];
+        return files.get(position);
     }
 
     @Override
@@ -64,11 +73,8 @@ public class saveFileAdapter extends BaseAdapter {
             }
         });
 
-        CheckBox checkBox = (CheckBox) view.findViewById(R.id.selectedToSave);
         TextView folderName = (TextView) view.findViewById(R.id.folderName);
-        //Log.d("TAG",""+checkBox.isChecked());
-        checkBox.setChecked(checkBox.isChecked());
-        folderName.setText(names[i]);
+        folderName.setText(files.get(i));
         return view;
 
     }

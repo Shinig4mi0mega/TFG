@@ -38,8 +38,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Map;
 
 public class folderSaveList extends AppCompatActivity {
@@ -49,8 +52,7 @@ public class folderSaveList extends AppCompatActivity {
     String savingPath;
     SharedPreferences prefs;
     SharedPreferences connectionprefs;
-    saveFileAdapter adapter;
-    ListView folderList;
+
 
     BufferedReader input;
     BufferedWriter output;
@@ -59,6 +61,9 @@ public class folderSaveList extends AppCompatActivity {
     int port;
 
     Uri fileSource;
+
+    ListView folderList;
+    saveFileAdapter adapter;
 
 
     @Override
@@ -77,6 +82,8 @@ public class folderSaveList extends AppCompatActivity {
 
         Button addButton = findViewById(R.id.add_input);
 
+        folderList = findViewById(R.id.folderList);
+
         ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
@@ -87,6 +94,11 @@ public class folderSaveList extends AppCompatActivity {
                             Uri uri = data.getData();
                             DocumentFile documentFile = DocumentFile.fromTreeUri(folderSaveList.this, uri);
                             fileSource = uri;
+
+                            adapter = new saveFileAdapter(folderSaveList.this , documentFile);
+                            folderList.setAdapter(adapter);
+                            adapter.notifyDataSetChanged();
+
                             send();
                         }
                     }
@@ -109,10 +121,27 @@ public class folderSaveList extends AppCompatActivity {
 
     }
 
+
+
     private void send() {
         user = connectionprefs.getString("user", "");
         ip = connectionprefs.getString("ip", "");
         port = Integer.parseInt(connectionprefs.getString("port", "9001"));
+
+        CheckBox checkBox = findViewById(R.id.dateCheckBox);
+        boolean isChecked = checkBox.isChecked();
+
+        if(isChecked){
+            LocalDate fechaActual = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            String fechaFormateada = fechaActual.format(formatter);
+            System.out.println(fechaFormateada);
+
+            user = fechaFormateada + user;
+            StringBuilder buser = new StringBuilder();
+            buser.append(fechaFormateada).append(" ").append(user);
+            user = buser.toString();
+        }
 
         Log.d("TAG", "Valor de user: " + user);
         Log.d("TAG", "Valor de ip: " + ip);
@@ -137,7 +166,7 @@ public class folderSaveList extends AppCompatActivity {
                         Log.d("TAG","UPLOAD ALLOWED");
                         Thread.sleep(100);
 
-                        sendFiles(DocumentFile.fromTreeUri(folderSaveList.this, fileSource), output);
+                        sendFiles(DocumentFile.fromTreeUri(folderSaveList.this, fileSource), output , isChecked);
 
                         System.out.println("Files uploaded, sending upload end");
                         new custompacket(method.UPLOAD_END, user, "").send(output);
@@ -157,32 +186,37 @@ public class folderSaveList extends AppCompatActivity {
         thread.start();
     }
 
-    private void sendFiles(DocumentFile rootFile, BufferedWriter out) throws IOException {
+    private void sendFiles(DocumentFile rootFile, BufferedWriter out , boolean isChecked) throws IOException {
         Log.d("TAG","uploading file: " + rootFile.getName());
         // Si es un directorio, llamada recursiva
         if (rootFile.isDirectory()) {
             for (DocumentFile file : rootFile.listFiles()) {
-                sendFiles(file, out);
+                sendFiles(file, out, isChecked);
             }
 
         } else {
 
-            // leemos la data del archivo
-            byte[] data = readFile(rootFile);
-            //System.out.println("data = " + data);
+            try {
+                // leemos la data del archivo
+                byte[] data = readFile(rootFile);
+                //System.out.println("data = " + data);
 
-            // Encode path
-            String Filepath = "";
-            Filepath = simplifyRoute(fileSource, rootFile.getUri());
-            String EncodedPath = Base64.getEncoder().encodeToString(Filepath.getBytes());
+                // Encode path
+                String Filepath = "";
+                Filepath = simplifyRoute(fileSource, rootFile.getUri());
+                String EncodedPath = Base64.getEncoder().encodeToString(Filepath.getBytes());
 
-            // encode data
-            String Encodeddata = Base64.getEncoder().encodeToString(data);
-            custompacket sended = new custompacket(method.UPLOAD_FILE.getMethod(), user, EncodedPath, Encodeddata);
+                // encode data
+                String Encodeddata = Base64.getEncoder().encodeToString(data);
+                custompacket sended = new custompacket(method.UPLOAD_FILE.getMethod(), user, EncodedPath, Encodeddata);
 
-            sended.send(out);
-            // TODO:Tratar este upload ack
-            new custompacket(input);
+                sended.send(out);
+                // TODO:Tratar este upload ack
+                new custompacket(input);
+            }catch (Exception e){
+
+            }
+
         }
     }
 

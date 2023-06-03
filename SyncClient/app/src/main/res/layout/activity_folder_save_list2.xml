@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/dateCheckbox"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".folderSaveList">
@@ -23,12 +24,12 @@
                 android:layout_weight="1"
                 android:text="add" />
 
-            <Button
-                android:id="@+id/save_input"
+            <CheckBox
+                android:id="@+id/dateCheckBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="save" />
+                android:text="Save with date" />
 
         </LinearLayout>
 

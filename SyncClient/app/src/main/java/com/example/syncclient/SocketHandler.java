@@ -103,6 +103,7 @@ public class SocketHandler {
         try (FileInputStream stream = new FileInputStream(rootFile.getUri().getPath())) {
             byte[] bytes = new byte[(int) rootFile.length()];
             stream.read(bytes);
+            stream.close();
             return bytes;
         } catch (IOException e) {
             System.err.println("Error al leer archivo como bytes: " + e.getMessage());

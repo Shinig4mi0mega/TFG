@@ -52,7 +52,6 @@ public class ServiceThread implements Runnable {
             socket.close();
 
             System.out.println(response.toString());
-            
 
         } catch (Exception e) {
             // e.printStackTrace();
@@ -65,7 +64,7 @@ public class ServiceThread implements Runnable {
             return TestHandler(packet);
         } else if (packet.PacketMethod.equals(method.UPLOAD_SYN.getMethod())) {
             return SynHandler(packet);
-        }else if(packet.PacketMethod.equals(method.LAST_UPLOADS_SYN.getMethod())){
+        } else if (packet.PacketMethod.equals(method.LAST_UPLOADS_SYN.getMethod())) {
             return lastUploadsHandler();
         } else {
             return new custompacket(method.UNKNOWN_METHOD, "Server", "");
@@ -74,7 +73,7 @@ public class ServiceThread implements Runnable {
 
     private custompacket lastUploadsHandler() {
         System.out.println(lastUploads());
-        return new custompacket(method.LAST_UPLOADS_ACK,"server",lastUploads());
+        return new custompacket(method.LAST_UPLOADS_ACK, "server", lastUploads());
     }
 
     private custompacket SynHandler(custompacket packet) {
@@ -102,16 +101,33 @@ public class ServiceThread implements Runnable {
             System.out.println("fallo con un input que se puso a null");
         }
 
-        custompacket packetFile = new custompacket(input);
+        custompacket packetFile = null;
+        try {
+            packetFile = new custompacket(input);
+        } catch (Exception e) {
+            System.out.println("failed to read packet");
+        }
+       
 
         while (!packetFile.PacketMethod.equals(method.UPLOAD_END.getMethod())) {
-            if (!packetFile.PacketMethod.equals(method.UPLOAD_FILE.getMethod()))
+            try {
+                if (packetFile.PacketMethod == null || !packetFile.PacketMethod.equals(method.UPLOAD_FILE.getMethod()))
+                    continue;
+
+                savefile(packetFile);
+                new custompacket(method.UPLOAD_ACK.getMethod(), "Server", "").send(output);
+
+                
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                System.out.println(packetFile.file + " failed to send");
                 continue;
-
-            savefile(packetFile);
-            new custompacket(method.UPLOAD_ACK.getMethod(), "Server", "").send(output);
-
-            packetFile = new custompacket(input);
+            }
+            try {
+                packetFile = new custompacket(input);
+            } catch (Exception e) {
+                System.out.println("failed to read packet");
+            }
         }
 
         return new custompacket(method.UPLOAD_END_ACK.getMethod(), "Server", "");
@@ -152,7 +168,7 @@ public class ServiceThread implements Runnable {
 
     private custompacket TestHandler(custompacket packet) {
         System.out.println("Test packet recive from: " + packet.user);
-        //System.out.println(lastUploads());
+        // System.out.println(lastUploads());
         return new custompacket(method.TEST_RESPONSE.getMethod(), "Server", packet.data);
 
     }
