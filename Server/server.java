@@ -1,15 +1,10 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,7 +35,9 @@ public class server {
         File savingFile = new File(fileSystemRootFile);
         if (!savingFile.exists())
             savingFile.mkdirs();
-
+        
+            printBanner();
+        
         System.out.println("Config loaded");
         System.out.println("Detected os: " + os);
         System.out.println("saving files in: " + configMap.get("saveRoute"));
@@ -56,8 +53,6 @@ public class server {
                     while (true) {
 
                         Socket socket = serverSocket.accept();
-                        // if (stop)
-                        // break;
                         ServiceThread st = new ServiceThread(socket, fileSystemRootFile,os);
                         threadPool.execute(st);
 
@@ -68,14 +63,8 @@ public class server {
             }
         };
 
-        // this.stop = false;
         this.serverThread.start();
 
-        try {
-            // new server().saveFiles(host, port, target);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /*
@@ -85,6 +74,17 @@ public class server {
      * saving pwd(MUST BE ABSOLUTE PATH)
      * 
      */
+
+    private void printBanner() {
+        System.out.println("==============================================================================================================");
+        System.out.println(" ####    ##    ####  #    #  ####      ####  #   # #    #  ####      ####  ###### #####  #    # ###### #####  ");
+        System.out.println("#       #  #  #    # #    # #    #    #       # #  ##   # #    #    #      #      #    # #    # #      #    # ");
+        System.out.println("#      #    # #      ###### #    #     ####    #   # #  # #          ####  #####  #    # #    # #####  #    # ");
+        System.out.println("#      ###### #      #    # #    #         #   #   #  # # #              # #      #####  #    # #      #####  ");
+        System.out.println("#      #    # #    # #    # #    #    #    #   #   #   ## #    #    #    # #      #   #   #  #  #      #   #  ");
+        System.out.println(" ####  #    #  ####  #    #  ####      ####    #   #    #  ####      ####  ###### #    #   ##   ###### #    # ");
+        System.out.println("==============================================================================================================");
+    }
 
     private boolean loadConfig() {
         File file = new File("config");
@@ -113,53 +113,4 @@ public class server {
         return true;
     }
 
-    private boolean mapUsers() {
-        System.out.println("Loading users...");
-        File userFile = new File("users");
-        if (!userFile.exists()) {
-            System.out.println("No user file found, building file");
-            try {
-                userFile.createNewFile();
-            } catch (IOException e) {
-            }
-            return false;
-        }
-
-        Scanner reader = null;
-        try {
-            reader = new Scanner(userFile);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        while (reader.hasNextLine()) {
-            String data = reader.nextLine();
-            users.put(data.split(":")[0], data.split(":")[1]);
-            System.out.println("user: " + data);
-        }
-
-        reader.close();
-
-        return true;
-    }
-
-    private void saveFiles(String host, int port, File target) throws IOException {
-        try (Socket socket = new Socket(host, port);
-                InputStream in = socket.getInputStream();
-                FileOutputStream out = new FileOutputStream(target)) {
-            System.out.println("Connected to " + host + " on port " + port);
-
-            copyDirectory(in, target);
-        }
-    }
-
-    private void copyDirectory(InputStream in, File target) throws IOException {
-        byte[] buffer = new byte[4096];
-        int read;
-        FileOutputStream out = new FileOutputStream(target);
-        while ((read = in.read(buffer)) != -1) {
-            out.write(buffer, 0, read);
-        }
-        out.close();
-    }
 }

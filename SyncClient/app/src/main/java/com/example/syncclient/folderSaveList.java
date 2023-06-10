@@ -18,6 +18,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.PowerManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.InputType;
@@ -38,6 +42,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.SocketException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -65,6 +70,12 @@ public class folderSaveList extends AppCompatActivity {
     ListView folderList;
     saveFileAdapter adapter;
 
+    int cont;
+
+    private PowerManager powerManager;
+    private PowerManager.WakeLock wakeLock;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +94,17 @@ public class folderSaveList extends AppCompatActivity {
         Button addButton = findViewById(R.id.add_input);
 
         folderList = findViewById(R.id.folderList);
+
+        powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MiApp:WakeLockTag");
+
+        while(!wakeLock.isHeld()) {
+            Log.d("TAG", "Requesting wakeLock");
+            wakeLock.acquire();
+        }
+
 
         ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -132,15 +154,7 @@ public class folderSaveList extends AppCompatActivity {
         boolean isChecked = checkBox.isChecked();
 
         if(isChecked){
-            LocalDate fechaActual = LocalDate.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-            String fechaFormateada = fechaActual.format(formatter);
-            System.out.println(fechaFormateada);
-
-            user = fechaFormateada + user;
-            StringBuilder buser = new StringBuilder();
-            buser.append(fechaFormateada).append(" ").append(user);
-            user = buser.toString();
+            user = addDateToUser(user);
         }
 
         Log.d("TAG", "Valor de user: " + user);
@@ -148,7 +162,6 @@ public class folderSaveList extends AppCompatActivity {
         Log.d("TAG", "Valor de port: " + port);
 
         DocumentFile source = DocumentFile.fromTreeUri(folderSaveList.this, fileSource);
-        Log.d("TAG","atemtim conection");
 
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -186,7 +199,18 @@ public class folderSaveList extends AppCompatActivity {
         thread.start();
     }
 
-    private void sendFiles(DocumentFile rootFile, BufferedWriter out , boolean isChecked) throws IOException {
+    private String addDateToUser(String user) {
+        LocalDate fechaActual = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String fechaFormateada = fechaActual.format(formatter);
+        System.out.println(fechaFormateada);
+
+        StringBuilder buser = new StringBuilder();
+        buser.append(fechaFormateada).append(" ").append(user);
+        return  buser.toString();
+    }
+
+    private void sendFiles(DocumentFile rootFile, BufferedWriter out , boolean isChecked) throws IOException, Exception {
         Log.d("TAG","uploading file: " + rootFile.getName());
         // Si es un directorio, llamada recursiva
         if (rootFile.isDirectory()) {
@@ -212,9 +236,45 @@ public class folderSaveList extends AppCompatActivity {
 
                 sended.send(out);
                 // TODO:Tratar este upload ack
-                new custompacket(input);
-            }catch (Exception e){
+                custompacket ack =  new custompacket(input);
+                while(!ack.PacketMethod.equals(method.UPLOAD_FILE_ACK.getMethod())){
+                    Thread.sleep(100);
+                    Log.d("TAG","Waiting for upload ack");
+                    ack =  new custompacket(input);
+                }
 
+                if(ack.PacketMethod.equals(method.UPLOAD_FILE_ACK.getMethod())){
+                    Log.d("TAG","Got an upload ack");
+                    adapter.setTrue(rootFile.getName());
+                    cont ++;
+                    if(cont == 10){
+                        folderList.setAdapter(adapter);
+                        Thread.sleep(100);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                adapter.notifyDataSetChanged();
+                            }
+                        });
+
+
+                        cont = 0;
+                    }
+
+                    //Thread.sleep(100);
+
+
+                }
+
+
+
+
+            }catch (IOException e){
+                Log.d("TAG","Error sending file, aborting sending more msg");
+                throw new IOException();
+            }catch (Exception e){
+                Log.d("TAG" ,"Warning log: " + e.getCause()  + "   "  + e.getMessage());
+                Log.d("TAG" ,e.getCause()  + e.getMessage());
             }
 
         }
@@ -255,6 +315,7 @@ public class folderSaveList extends AppCompatActivity {
 
         return toret.toString();
     }
+
 
 
 }

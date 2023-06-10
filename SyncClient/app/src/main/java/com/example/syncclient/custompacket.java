@@ -79,7 +79,7 @@ public class custompacket {
         return toret.toString();
     }
 
-    public void send(BufferedWriter writer) {
+    public void send(BufferedWriter writer) throws IOException{
         if (writer != null) {
             try {
                 writer.write("method:" + PacketMethod + "\n");
@@ -89,6 +89,7 @@ public class custompacket {
                 writer.flush();
             } catch (IOException e) {
                 e.printStackTrace();
+                throw e;
             }
         }
 

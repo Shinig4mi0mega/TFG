@@ -8,7 +8,7 @@ package com.example.syncclient;
  * UPLOAD_SYN: Informs the server that the client wants to upload files
  * UPLOAD_ACK: Confirms the upload and that the server is ready to recive the files
  * UPLOAD_FILE: This packet contains in its data the file that is been uploaded
- * UPLOAD_FILE_ACK: Confimation packet for the client that the file has been received and isbeen procesed
+ * UPLOAD_FILE_ACK: Confimation packet for the client that the file has been received and is been procesed
  * UPLOAD_END:Informs the server there arent more files to send
  * UPLOAD_END:Confirms the reception of the UPLOAD_END packet
  * UPLOAD_CANCEL:Server negates the upload to the client

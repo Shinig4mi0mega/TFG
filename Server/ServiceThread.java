@@ -51,7 +51,7 @@ public class ServiceThread implements Runnable {
 
             socket.close();
 
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
 
         } catch (Exception e) {
             // e.printStackTrace();
@@ -72,7 +72,8 @@ public class ServiceThread implements Runnable {
     }
 
     private custompacket lastUploadsHandler() {
-        System.out.println(lastUploads());
+        //System.out.println(lastUploads());
+        System.out.println("Enviando ultimos archivos subidos por cada usuario");
         return new custompacket(method.LAST_UPLOADS_ACK, "server", lastUploads());
     }
 
@@ -109,27 +110,43 @@ public class ServiceThread implements Runnable {
         }
        
 
+        int i = 0;
         while (!packetFile.PacketMethod.equals(method.UPLOAD_END.getMethod())) {
             try {
-                if (packetFile.PacketMethod == null || !packetFile.PacketMethod.equals(method.UPLOAD_FILE.getMethod()))
+                //Thread.currentThread().sleep(100);
+                if (packetFile.PacketMethod == null || !packetFile.PacketMethod.equals(method.UPLOAD_FILE.getMethod())){
+                    System.out.println("Null packet found");
                     continue;
+                }
 
                 savefile(packetFile);
-                new custompacket(method.UPLOAD_ACK.getMethod(), "Server", "").send(output);
+                new custompacket(method.UPLOAD_FILE_ACK.getMethod(), "Server", "").send(output);
 
                 
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                //System.out.println(e.getMessage());
                 System.out.println(packetFile.file + " failed to send");
+                i++;
+                if(i == 20){
+                    System.out.println("Too many errors reciving, closing thread");
+                    break;
+                }
+                    
                 continue;
             }
             try {
                 packetFile = new custompacket(input);
             } catch (Exception e) {
                 System.out.println("failed to read packet");
+                i++;
+                if(i == 50){
+                    System.out.println("Too many errors, closing thread");
+                    break;
+                }
             }
         }
 
+        System.out.println("All files recived");
         return new custompacket(method.UPLOAD_END_ACK.getMethod(), "Server", "");
     }
 
@@ -140,7 +157,7 @@ public class ServiceThread implements Runnable {
         decodedPath = decodedPath.replace("\\", separador);
         decodedPath = decodedPath.replace("/", separador);
 
-        System.out.println("guardando archivo: " + decodedPath);
+        System.out.println("guardando archivo: " + decodedPath +" de " + packetFile.user);
 
         // ruta al archivo
         String localRoute = fileSystemRootFile + separador + packetFile.user + decodedPath;
@@ -151,7 +168,7 @@ public class ServiceThread implements Runnable {
         if (!parentDir.exists())
             parentDir.mkdirs();
 
-        // creamos y escribimos en el archivola data
+        // creamos y escribimos en el archivo la data
         try {
             currentFile.createNewFile();
             byte[] decodedBytesData = Base64.getDecoder().decode(packetFile.data.getBytes());
@@ -168,9 +185,8 @@ public class ServiceThread implements Runnable {
 
     private custompacket TestHandler(custompacket packet) {
         System.out.println("Test packet recive from: " + packet.user);
-        // System.out.println(lastUploads());
         return new custompacket(method.TEST_RESPONSE.getMethod(), "Server", packet.data);
-
+ 
     }
 
     private String lastUploads() {
