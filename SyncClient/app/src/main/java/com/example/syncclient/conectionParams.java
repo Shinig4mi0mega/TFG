@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -19,7 +20,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
-public class MainActivity extends AppCompatActivity {
+public class conectionParams extends AppCompatActivity {
     String user;
     String ip;
     int port;
@@ -30,10 +31,12 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences prefs;
     lastUploadAdapter adapter;
 
+    boolean test;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_conection_params);
 
         user_input = findViewById(R.id.user_input);
         ip_input = findViewById(R.id.ip_input);
@@ -41,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         ListView users = findViewById(R.id.lastUploads);
         CheckBox checkBox = findViewById(R.id.test_result);
 
+        test = false;
         prefs = getSharedPreferences("conection", Context.MODE_PRIVATE);
 
         loadPreferences();
@@ -53,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //TODO:hacer que funcione el boton test
         Button test_button = findViewById(R.id.test_button);
         test_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,13 +64,14 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     public void run() {
                         final boolean resTest = testServer();
+                        test = resTest;
                         String lastUploads = getUploads();
                         runOnUiThread(new Runnable() {
                             public void run() {
                                 Log.d("TAG", "Estado de conexión: " + resTest);
                                 // Usar la variable final adicional para actualizar la interfaz de usuario
                                 checkBox.setChecked(resTest);
-                                adapter = new lastUploadAdapter(MainActivity.this,lastUploads);
+                                adapter = new lastUploadAdapter(conectionParams.this,lastUploads);
                                 users.setAdapter(adapter);
                                 adapter.notifyDataSetChanged();
 
@@ -147,7 +151,10 @@ public class MainActivity extends AppCompatActivity {
         editor.putString("port", "" + port);
         editor.commit();
 
-        this.startActivity( new Intent( this, folderSaveList.class ) );
+        if(test)
+            this.startActivity( new Intent( this, folderSaveList.class ) );
+        else
+            Toast.makeText(getApplicationContext(), "Verifica la conexión", Toast.LENGTH_SHORT).show();
     }
 
 

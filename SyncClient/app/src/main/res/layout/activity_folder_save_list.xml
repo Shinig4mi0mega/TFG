@@ -22,14 +22,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="add" />
+                android:text="@string/add" />
 
             <CheckBox
                 android:id="@+id/dateCheckBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Save with date" />
+                android:text="@string/save_with_date" />
 
         </LinearLayout>
 

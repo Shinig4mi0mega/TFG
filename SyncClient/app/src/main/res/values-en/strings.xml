@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SyncClient</string>
+    <string name="add">select folder</string>
+    <string name="save_with_date">add date</string>
+    <string name="user">user</string>
+    <string name="port">port</string>
+    <string name="test">test</string>
+    <string name="save">save</string>
+</resources>

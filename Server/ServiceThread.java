@@ -83,7 +83,7 @@ public class ServiceThread implements Runnable {
             try {
                 output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             } catch (IOException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
             new custompacket(method.UPLOAD_ACK.getMethod(), "Server", "").send(output);
 
@@ -157,7 +157,7 @@ public class ServiceThread implements Runnable {
         decodedPath = decodedPath.replace("\\", separador);
         decodedPath = decodedPath.replace("/", separador);
 
-        System.out.println("guardando archivo: " + decodedPath +" de " + packetFile.user);
+        System.out.println( packetFile.user  + " subio: " + decodedPath );
 
         // ruta al archivo
         String localRoute = fileSystemRootFile + separador + packetFile.user + decodedPath;
@@ -178,7 +178,7 @@ public class ServiceThread implements Runnable {
             stream.close();
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
     }
