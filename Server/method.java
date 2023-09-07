@@ -8,7 +8,7 @@
  * UPLOAD_FILE: This packet contains in its data the file that is been uploaded
  * UPLOAD_FILE_ACK: Confimation packet for the client that the file has been received and isbeen procesed
  * UPLOAD_END:Informs the server there arent more files to send
- * UPLOAD_END:Confirms the reception of the UPLOAD_END packet
+ * UPLOAD_END_ACK:Confirms the reception of the UPLOAD_END packet
  * UPLOAD_CANCEL:Server negates the upload to the client
  * 
  * FILE_SAVE:Informs the client the server saved the file correctly (user and file should be the same as the ones sended to verify the file was saved correctly)
@@ -17,6 +17,9 @@
  * LAST_UPLOADS_ACK: answers the LAST_UPLOADS_SYN with the last uploads done of each client
  * 
  * UNKNOWN_METHOD:response to a unknown method send by server o client
+ * 
+ * FIND_SERVER: Packet sent to find any active server
+ * FIND_SERVER_ACK: answer to FIND_SERVER to let know the client there is a server
  */
 
 public enum method {
@@ -34,6 +37,8 @@ public enum method {
     FILE_SAVE_FAILED("FILE_SAVE"),
     LAST_UPLOADS_SYN("LAST_UPLOADS_SYN"),
     LAST_UPLOADS_ACK("LAST_UPLOADS_ACK"),
+    FIND_SERVER("FIND_SERVER"),
+    FIND_SERVER_ACK("FIND_SERVER_ACK"),
     UNKNOWN_METHOD("UNKNOWN_METHOD");
 
     private String method;

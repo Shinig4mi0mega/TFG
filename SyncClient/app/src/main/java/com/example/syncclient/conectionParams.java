@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,6 +21,11 @@ import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 
 public class conectionParams extends AppCompatActivity {
     String user;
@@ -83,15 +90,87 @@ public class conectionParams extends AppCompatActivity {
         });
 
 
+        Button auto_button = findViewById(R.id.auto_button);
+        auto_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    public void run() {
+                        String IP = findServer(getheadIP());
+                        Log.d("TAG", "IP DEL SERVER: " + IP);
+
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "Fin de escaneo de servidores", Toast.LENGTH_SHORT).show();
+                                ip_input.setText(IP);
+
+                            }
+                        });
+                    }
+                }).start();
+            }
+        });
+
+
+
+
 
 
     }
 
+    private String getheadIP(){
+        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        int IipAddress = wifiInfo.getIpAddress();
+        String SipAddress = String.format("%d.%d.%d",
+                (IipAddress & 0xff), (IipAddress >> 8 & 0xff),
+                (IipAddress >> 16 & 0xff));
+        StringBuilder ipAddress = new StringBuilder(SipAddress);
+        ipAddress.append(".");
+        Log.d("TAG", "IP DEL TLF: " + ipAddress.toString());
+        return ipAddress.toString();
+    }
+
+    private String findServer(String headIP){
+        for(int i= 1; i< 256; i++){
+            Log.d("TAG", "TESTING IP: " + headIP + i);
+            try (Socket socket = new Socket(headIP + i, port)){
+                //socket.setSoTimeout();
+                BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+                BufferedWriter output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+
+
+                custompacket request = new custompacket(method.FIND_SERVER.getMethod(), user, "");
+                request.send(output);
+
+                Thread.sleep(100);
+
+                custompacket response = new custompacket(input);
+
+                // Publica un Runnable en el UI thread
+
+                if(response.PacketMethod.equals(method.FIND_SERVER_ACK.getMethod())){
+                    testServer();
+                    return headIP + i;
+
+                }
+
+
+            }catch (Exception e){}
+        }
+        return "ERROR";
+    }
+
     private String getUploads() {
-        user = user_input.getText().toString();
-        ip = ip_input.getText().toString();
-        String valor = port_input.getText().toString();
-        port = Integer.parseInt(valor);
+        try {
+            user = user_input.getText().toString();
+            ip = ip_input.getText().toString();
+            String valor = port_input.getText().toString();
+            port = Integer.parseInt(valor);
+        }catch (Exception e){
+            return "";
+        }
+
 
         try (Socket socket = new Socket(ip, port)) {
             socket.setSoTimeout(200);
@@ -139,11 +218,6 @@ public class conectionParams extends AppCompatActivity {
         String valor = port_input.getText().toString();
         port = Integer.parseInt(valor);
 
-        //Log.d("TAG", "Valor de user: " + user);
-        //Log.d("TAG", "Valor de ip: " + ip);
-        //Log.d("TAG", "Valor de port: " + port);
-
-
         SharedPreferences.Editor editor = prefs.edit();
 
         editor.putString("user", user);
@@ -160,10 +234,15 @@ public class conectionParams extends AppCompatActivity {
 
 
     private boolean testServer(){
-        user = user_input.getText().toString();
-        ip = ip_input.getText().toString();
-        String valor = port_input.getText().toString();
-        port = Integer.parseInt(valor);
+        try {
+            user = user_input.getText().toString();
+            ip = ip_input.getText().toString();
+            String valor = port_input.getText().toString();
+            port = Integer.parseInt(valor);
+        } catch (Exception e) {
+            return false;
+        }
+
 
         try (Socket socket = new Socket(ip, port)) {
             socket.setSoTimeout(200);

@@ -66,9 +66,18 @@ public class ServiceThread implements Runnable {
             return SynHandler(packet);
         } else if (packet.PacketMethod.equals(method.LAST_UPLOADS_SYN.getMethod())) {
             return lastUploadsHandler();
+        } else if (packet.PacketMethod.equals(method.FIND_SERVER.getMethod())) {
+            return FindServerHandler();
         } else {
             return new custompacket(method.UNKNOWN_METHOD, "Server", "");
         }
+    }
+
+    private custompacket FindServerHandler() {
+
+        System.out.println("PING RECIVED");
+        return new custompacket(method.FIND_SERVER_ACK,"server","");
+        
     }
 
     private custompacket lastUploadsHandler() {

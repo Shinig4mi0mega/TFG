@@ -39,7 +39,6 @@ public class saveFileAdapter extends BaseAdapter {
                 makeFileList(file);
             }
         }else{
-            //files.put(fileToList.getName(),false);
             files.add(fileToList.getName());
             state.add(false);
         }
@@ -78,16 +77,11 @@ public class saveFileAdapter extends BaseAdapter {
             view = inflater.inflate(R.layout.saving_folders_layout, viewGroup, false);
         }
 
-
         String fileToChange = files.get(i);
         Boolean fileState = state.get(i);
-        Log.d("TAG","File State " + state.get(i));
-
 
         if(fileState){
             CheckBox cb = (CheckBox) view.findViewById(R.id.isUploaded);
-            Log.d("TAG","This cant be false:  " + state.get(i));
-            Log.d("TAG","updating check true" + files.get(i));
             cb.setChecked(true);
         }else{
             CheckBox cb = (CheckBox) view.findViewById(R.id.isUploaded);

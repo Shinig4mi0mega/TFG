@@ -32,6 +32,8 @@ import java.util.Base64;
 
 public class folderSaveList extends AppCompatActivity {
 
+    //TODO:Limpiar array cuando se valla a selecionar otra carpeta
+    //TODO:Arreglar que se vean los cambios si lo estas viendo directamente
     private static final int PICK_FILE_REQUEST_CODE = 1001;
     String savingName;
     String savingPath;
@@ -50,8 +52,6 @@ public class folderSaveList extends AppCompatActivity {
     ListView folderList;
     saveFileAdapter adapter;
 
-    int cont;
-
     private PowerManager powerManager;
     private PowerManager.WakeLock wakeLock;
 
@@ -61,6 +61,7 @@ public class folderSaveList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_folder_save_list);
+        getSupportActionBar().hide();
 
         folderList = findViewById(R.id.folderList);
         prefs = getSharedPreferences("folders", Context.MODE_PRIVATE);
@@ -192,7 +193,6 @@ public class folderSaveList extends AppCompatActivity {
             try {
                 // leemos la data del archivo
                 byte[] data = readFile(rootFile);
-                //System.out.println("data = " + data);
 
                 // Encode path
                 String Filepath = "";
@@ -215,28 +215,20 @@ public class folderSaveList extends AppCompatActivity {
                 if(ack.PacketMethod.equals(method.UPLOAD_FILE_ACK.getMethod())){
                     Log.d("TAG","Got an upload ack");
                     adapter.setTrue(rootFile.getName());
-                    cont ++;
-                    if(cont == 10){
-                        folderList.setAdapter(adapter);
-                        Thread.sleep(100);
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                try {
+                                    Thread.sleep(100);
+                                }catch(Exception e){
+
+                                }
                                 adapter.notifyDataSetChanged();
                             }
                         });
 
-
-                        cont = 0;
-                    }
-
-                    //Thread.sleep(100);
-
-
                 }
-
-
-
 
             }catch (IOException e){
                 Log.d("TAG","Error sending file, aborting sending more msg");
