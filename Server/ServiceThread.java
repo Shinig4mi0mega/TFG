@@ -185,10 +185,7 @@ public class ServiceThread implements Runnable {
             FileOutputStream stream = new FileOutputStream(localRoute);
             stream.write(decodedBytesData);
             stream.close();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            //e.printStackTrace();
-        }
+        } catch (IOException e) {}
 
     }
 
@@ -198,21 +195,21 @@ public class ServiceThread implements Runnable {
  
     }
 
-    private String lastUploads() {
+        private String lastUploads() {
 
-        File savingFolder = new File(fileSystemRootFile);
-        StringBuilder toret = new StringBuilder();
+            File savingFolder = new File(fileSystemRootFile);
+            StringBuilder toret = new StringBuilder();
 
-        for (File f : savingFolder.listFiles()) {
+            for (File f : savingFolder.listFiles()) {
 
-            Date date = new Date();
-            date.setTime(f.lastModified());
-            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-            String formattedDate = formatter.format(date);
+                Date date = new Date();
+                date.setTime(f.lastModified());
+                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+                String formattedDate = formatter.format(date);
 
-            toret.append(f.getName()).append("=").append(formattedDate).append(";");
+                toret.append(f.getName()).append("=").append(formattedDate).append(";");
+            }
+
+            return toret.toString();
         }
-
-        return toret.toString();
-    }
 }

@@ -14,13 +14,16 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -78,9 +81,12 @@ public class conectionParams extends AppCompatActivity {
                                 Log.d("TAG", "Estado de conexión: " + resTest);
                                 // Usar la variable final adicional para actualizar la interfaz de usuario
                                 checkBox.setChecked(resTest);
-                                adapter = new lastUploadAdapter(conectionParams.this,lastUploads);
-                                users.setAdapter(adapter);
-                                adapter.notifyDataSetChanged();
+                                if(resTest){
+                                    adapter = new lastUploadAdapter(conectionParams.this,lastUploads);
+                                    users.setAdapter(adapter);
+                                    adapter.notifyDataSetChanged();
+                                }
+
 
                             }
                         });
@@ -94,6 +100,33 @@ public class conectionParams extends AppCompatActivity {
         auto_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String valor = port_input.getText().toString();
+                try {
+                    port = Integer.parseInt(valor);
+                }catch (Exception e){
+                    port = 9001;
+                    Toast.makeText(getApplicationContext(), "Usando numero de puerto predeterminado", Toast.LENGTH_SHORT).show();
+                    port_input.setText("9001");
+                    try {
+                        Thread.sleep(1000);
+                    }catch (Exception x){
+
+                    }
+                }
+
+                if(port <0 || port> 65535){
+                    Toast.makeText(getApplicationContext(), "Usando numero de puerto predeterminado", Toast.LENGTH_SHORT).show();
+                    port = 9001;
+                    port_input.setText("9001");
+                    try {
+                        Thread.sleep(1000);
+                    }catch (Exception e){
+
+                    }
+
+                }
+                Toast.makeText(getApplicationContext(), "Buscando servidor, espera unos segundos", Toast.LENGTH_SHORT).show();
+
                 new Thread(new Runnable() {
                     public void run() {
                         String IP = findServer(getheadIP());
@@ -101,7 +134,10 @@ public class conectionParams extends AppCompatActivity {
 
                         runOnUiThread(new Runnable() {
                             public void run() {
-                                Toast.makeText(getApplicationContext(), "Fin de escaneo de servidores", Toast.LENGTH_SHORT).show();
+                                if(IP.equals("ERROR"))
+                                Toast.makeText(getApplicationContext(), "No se encontro el servidor", Toast.LENGTH_SHORT).show();
+                                else
+                                    Toast.makeText(getApplicationContext(), "Servidor encontrado IP, añadida al campo IP", Toast.LENGTH_SHORT).show();
                                 ip_input.setText(IP);
 
                             }
@@ -133,8 +169,10 @@ public class conectionParams extends AppCompatActivity {
 
     private String findServer(String headIP){
         for(int i= 1; i< 256; i++){
-            Log.d("TAG", "TESTING IP: " + headIP + i);
-            try (Socket socket = new Socket(headIP + i, port)){
+            Log.d("TAG", "TESTING IP: " + headIP + i + ":" + port);
+
+            try (Socket socket = new Socket()) {
+                socket.connect(new InetSocketAddress(headIP + i, port), 50);
                 //socket.setSoTimeout();
                 BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
                 BufferedWriter output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -154,8 +192,6 @@ public class conectionParams extends AppCompatActivity {
                     return headIP + i;
 
                 }
-
-
             }catch (Exception e){}
         }
         return "ERROR";
@@ -206,8 +242,10 @@ public class conectionParams extends AppCompatActivity {
         if (!user.equals("")) {
             user_input.setText(user);
             ip_input.setText(ip);
-            port_input.setText("" + port);
+
         }
+
+        port_input.setText("" + port);
     }
 
     private void savePreferences(){
@@ -244,8 +282,9 @@ public class conectionParams extends AppCompatActivity {
         }
 
 
-        try (Socket socket = new Socket(ip, port)) {
-            socket.setSoTimeout(200);
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress(ip, port), 100);
+
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
             BufferedWriter output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
@@ -256,9 +295,17 @@ public class conectionParams extends AppCompatActivity {
             custompacket response = new custompacket(input);
             socket.close();
 
-            return true;
+            Log.d("TAG", "the test result: " +  (response.PacketMethod.equals(method.TEST_RESPONSE.getMethod())));
 
-        } catch (Exception e) {
+            if((response.PacketMethod.equals(method.TEST_RESPONSE.getMethod())))
+                return true;
+            else
+                return false;
+
+        } catch (SocketTimeoutException e) {
+            Log.d("TAG", "the test result: False");
+            return false;
+        }catch (Exception e){
             return false;
         }
     }

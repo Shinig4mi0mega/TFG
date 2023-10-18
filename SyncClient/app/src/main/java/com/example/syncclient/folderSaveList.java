@@ -180,8 +180,7 @@ public class folderSaveList extends AppCompatActivity {
         return  buser.toString();
     }
 
-    private void sendFiles(DocumentFile rootFile, BufferedWriter out , boolean isChecked) throws IOException, Exception {
-        Log.d("TAG","uploading file: " + rootFile.getName());
+    private void sendFiles(DocumentFile rootFile, BufferedWriter out , boolean isChecked) throws IOException{
         // Si es un directorio, llamada recursiva
         if (rootFile.isDirectory()) {
             for (DocumentFile file : rootFile.listFiles()) {
@@ -230,12 +229,9 @@ public class folderSaveList extends AppCompatActivity {
 
                 }
 
-            }catch (IOException e){
+            }catch (Exception e){
                 Log.d("TAG","Error sending file, aborting sending more msg");
                 throw new IOException();
-            }catch (Exception e){
-                Log.d("TAG" ,"Warning log: " + e.getCause()  + "   "  + e.getMessage());
-                Log.d("TAG" ,e.getCause()  + e.getMessage());
             }
 
         }

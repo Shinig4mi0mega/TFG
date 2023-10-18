@@ -56,10 +56,6 @@ public class custompacket {
             else
                 data = "emty";
 
-            // System.out.println(this.toString());
-
-        
-
     }
 
     @Override
